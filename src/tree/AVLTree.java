@@ -114,70 +114,79 @@ public class AVLTree {
                 found = true;
             else if(index < current.getNodeData() && current.getLeftChild() != null)
                 current = current.getLeftChild();
-            else  if(index > current.getNodeData() && current.getRightChild() != null)
+            else if(index > current.getNodeData() && current.getRightChild() != null)
                 current = current.getRightChild();
         }
         return current;
     }
 
     public int getBalanceFactor(TreeNode current) {
-        int leftHeight = 1;
-        int rightHeight = 1;
+        int leftHeight = 0;
+        int rightHeight = 0;
         TreeNode root = current;
-        while(!current.isLeaf()) {
-            leftHeight++;
+        do {
             current = current.getLeftChild();
-        }
+            leftHeight++;
+        } while(!current.isLeaf());
 
         current = root;
 
-        while(!current.isLeaf()) {
-            rightHeight++;
+        do {
             current = current.getRightChild();
-        }
+            rightHeight++;
+        } while(!current.isLeaf());
 
         return leftHeight - rightHeight;
     }
 
     public boolean isBalanced(TreeNode current) {
-        return this.getBalanceFactor(current) >= -1 && this.getBalanceFactor(current) <= 1;
+        int fb = this.getBalanceFactor(current);
+        return fb >= -1 && fb <= 1;
     }
 
-    public void simpleRotation(TreeNode current) {
+    public void simpleRightRotation(TreeNode current) {
+        TreeNode leftChild = current.getLeftChild();
+
+        if(leftChild.hasSingleChild() && current.getParent() != null) {
+            TreeNode parent = current.getParent();
+            parent.setLeftChild(leftChild);
+            leftChild.setRightChild(current);
+        } else if(leftChild.hasSingleChild() && current.getParent() == null) {
+            this.setRoot(leftChild);
+            leftChild.setRightChild(current);
+        } else if(leftChild.hasDoubleChild() && current.getParent() == null) {
+            TreeNode rightChild = leftChild.getRightChild();
+            this.setRoot(leftChild);
+            leftChild.setRightChild(current);
+            current.setLeftChild(rightChild);
+        }
+    }
+
+    public void simpleLeftRotation(TreeNode current) {
+        TreeNode rightChild = current.getRightChild();
+        if(rightChild.hasSingleChild() && current.getParent() != null) {
+            TreeNode parent = current.getParent();
+            parent.setRightChild(rightChild);
+            rightChild.setLeftChild(current);
+        } else if(rightChild.hasSingleChild() && current.getParent() == null) {
+            this.setRoot(rightChild);
+            rightChild.setLeftChild(current);
+        } else if(rightChild.hasDoubleChild() && current.getParent() == null) {
+            TreeNode leftChild = rightChild.getLeftChild();
+            this.setRoot(rightChild);
+            rightChild.setLeftChild(current);
+            current.setRightChild(leftChild);
+        }
+    }
+
+    public void doubleRotation(TreeNode current) {
         int fb = this.getBalanceFactor(current);
 
         if(fb > 1) {
-            TreeNode leftChild = current.getLeftChild();
-            if(leftChild.hasSingleChild() && current.getParent() != null) {
-                TreeNode parent = current.getParent();
-                parent.setLeftChild(leftChild);
-                leftChild.setRightChild(current);
-            } else if(leftChild.hasSingleChild() && current.getParent() == null) {
-                this.setRoot(leftChild);
-                leftChild.setRightChild(current);
-            }
-            else if(leftChild.hasDoubleChild() && current.getParent() == null) {
-                TreeNode rightChild = leftChild.getRightChild();
-                this.setRoot(leftChild);
-                leftChild.setRightChild(current);
-                current.setLeftChild(rightChild);
-            }
-        } else {
-            TreeNode rightChild = current.getRightChild();
-            if(rightChild.hasSingleChild() && current.getParent() != null) {
-                TreeNode parent = current.getParent();
-                parent.setRightChild(rightChild);
-                rightChild.setLeftChild(current);
-            } else if(rightChild.hasSingleChild() && current.getParent() == null) {
-                this.setRoot(rightChild);
-                rightChild.setLeftChild(current);
-            } else if(rightChild.hasDoubleChild() && current.getParent() == null) {
-                TreeNode leftChild = rightChild.getLeftChild();
-                this.setRoot(rightChild);
-                rightChild.setLeftChild(current);
-                current.setRightChild(leftChild);
-            }
+
         }
+
     }
+
 
 }
