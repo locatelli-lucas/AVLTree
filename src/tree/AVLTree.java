@@ -1,10 +1,14 @@
 package tree;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+
 public class AVLTree {
     private TreeNode root;
 
-    public AVLTree(TreeNode root) {
-        this.root = root;
+    public AVLTree() {
+
     }
 
     public TreeNode getRoot() {
@@ -16,35 +20,45 @@ public class AVLTree {
     }
 
     public void insert(TreeNode node) {
-        TreeNode current = this.root;
+        if(this.root == null) {
+            this.root = node;
+        } else {
+            TreeNode current = this.root;
 
-        boolean inserted = false;
-        int data = node.getNodeData();
-        if(data == current.getNodeData()) throw new IllegalArgumentException("Data already exists in the tree");
+            boolean inserted = false;
+            int data = node.getNodeData();
+            if (this.search(data) != null) throw new IllegalArgumentException("Data already exists in the tree");
 
-        while(!inserted) {
-            if(data < current.getNodeData()) {
-                TreeNode leftChild = current.getLeftChild();
-                if(leftChild == null) {
-                    current.setLeftChild(node);
-                    inserted = true;
+            while (!inserted) {
+                if (data < current.getNodeData()) {
+                    TreeNode leftChild = current.getLeftChild();
+                    if (leftChild == null) {
+                        current.setLeftChild(node);
+                        current.getLeftChild().setParent(current);
+                        inserted = true;
+                    } else {
+                        current = current.getLeftChild();
+                    }
                 } else {
-                    current = current.getLeftChild();
-                }
-            } else {
-                TreeNode rightChild = current.getRightChild();
-                if(rightChild == null) {
-                    current.setRightChild(node);
-                    inserted = true;
-                } else {
-                    current = current.getRightChild();
+                    TreeNode rightChild = current.getRightChild();
+                    if (rightChild == null) {
+                        current.setRightChild(node);
+                        current.getRightChild().setParent(current);
+                        inserted = true;
+                    } else {
+                        current = current.getRightChild();
+                    }
                 }
             }
         }
+        if(!node.isRoot())
+            this.balanceTree(node);
+        System.out.println(this.printTree());
     }
 
     public void delete(int index, int doubleChildMethod) {
         TreeNode current = this.search(index);
+        if(current == null) throw new RuntimeException("Node not found");
 
         if(current.hasSingleChild())
             this.singleChildDelete(current);
@@ -53,18 +67,17 @@ public class AVLTree {
                 this.doubleChildDeleteByMerge(current);
             else if(doubleChildMethod == 2)
                 this.doubleChildDeleteByCopy(current);
-        else if(current.isLeaf())
-            this.deleteLeaf(current);
     }
 
     public void deleteLeaf(TreeNode node) {
-        TreeNode parent = node.getParent();
-        if(parent != null) {
-            if(parent.getLeftChild() == node)
-                parent.setLeftChild(null);
+        TreeNode current = node.getParent();
+        if(current != null) {
+            if(current.getLeftChild() == node)
+                current.setLeftChild(null);
             else
-                parent.setRightChild(null);
-        }
+                current.setRightChild(null);
+        } else
+            node = null;
     }
 
     public void singleChildDelete(TreeNode node) {
@@ -76,18 +89,26 @@ public class AVLTree {
                 parent.setLeftChild(child);
             else
                 parent.setRightChild(child);
-        }
+        } else if(node.isLeaf())
+            this.deleteLeaf(node);
     }
 
     public void doubleChildDeleteByCopy(TreeNode node) {
-        TreeNode leaf = node.getLeftChild();
+        TreeNode current = node.getLeftChild();
 
-        while(!leaf.isLeaf())
-            leaf = leaf.getRightChild();
+        while(!current.isLeaf()) {
+            current = current.getRightChild();
+        }
 
-        node.setNodeData(leaf.getNodeData());
-        TreeNode leafParent = leaf.getParent();
-        leafParent.setRightChild(null);
+        node.setNodeData(current.getNodeData());
+        TreeNode leafParent = current.getParent();
+
+        if(current == node.getLeftChild())
+            leafParent.setLeftChild(null);
+        else
+            leafParent.setRightChild(null);
+
+        current = null;
     }
 
     public void doubleChildDeleteByMerge(TreeNode node) {
@@ -108,33 +129,51 @@ public class AVLTree {
 
     public TreeNode search(int index) {
         TreeNode current = this.root;
-        boolean found = false;
-        while(!found) {
+        while(current != null) {
             if(index == current.getNodeData())
-                found = true;
-            else if(index < current.getNodeData() && current.getLeftChild() != null)
+                return current;
+            else if(index < current.getNodeData())
                 current = current.getLeftChild();
-            else if(index > current.getNodeData() && current.getRightChild() != null)
+            else if(index > current.getNodeData())
                 current = current.getRightChild();
         }
-        return current;
+        return null;
+    }
+
+    public int calculateLeftHeight(TreeNode current, int height) {
+        if(current.getLeftChild() == null
+                && current.getRightChild() != null
+                && !current.isRoot())
+            return calculateLeftHeight(current.getChild(), height + 1);
+        if(current.getLeftChild() == null || current.isLeaf()) return height;
+        if(current.hasSingleChild()) return calculateLeftHeight(current.getChild(), height + 1);
+
+        int leftHeight = calculateLeftHeight(current.getLeftChild(), height + 1);
+        int rightHeight = calculateRightHeight(current.getRightChild(), height + 1);
+
+        if(current.isRoot()) return leftHeight;
+        return Math.max(leftHeight, rightHeight);
+    }
+
+    public int calculateRightHeight(TreeNode current, int height) {
+        if(current.getRightChild() == null
+                && current.getLeftChild() != null
+                && !current.isRoot())
+            return calculateRightHeight(current.getChild(), height + 1);
+        if(current.getRightChild() == null || current.isLeaf()) return height;
+        if(current.hasSingleChild()) return calculateRightHeight(current.getChild(), height + 1);
+
+        int leftHeight = calculateLeftHeight(current.getLeftChild(), height + 1);
+        int rightHeight = calculateRightHeight(current.getRightChild(), height + 1);
+
+        if(current.isRoot()) return rightHeight;
+        return Math.max(leftHeight, rightHeight);
     }
 
     public int getBalanceFactor(TreeNode current) {
-        int leftHeight = 0;
-        int rightHeight = 0;
-        TreeNode root = current;
-        do {
-            current = current.getLeftChild();
-            leftHeight++;
-        } while(!current.isLeaf());
-
-        current = root;
-
-        do {
-            current = current.getRightChild();
-            rightHeight++;
-        } while(!current.isLeaf());
+        if(current.isLeaf()) return 0;
+        int leftHeight = this.calculateLeftHeight(current, 0);
+        int rightHeight = this.calculateRightHeight(current, 0);
 
         return leftHeight - rightHeight;
     }
@@ -147,46 +186,106 @@ public class AVLTree {
     public void simpleRightRotation(TreeNode current) {
         TreeNode leftChild = current.getLeftChild();
 
-        if(leftChild.hasSingleChild() && current.getParent() != null) {
+        if(leftChild.hasSingleChild() && !current.isRoot()) {
             TreeNode parent = current.getParent();
             parent.setLeftChild(leftChild);
+            leftChild.setParent(parent);
             leftChild.setRightChild(current);
-        } else if(leftChild.hasSingleChild() && current.getParent() == null) {
+            current.setParent(leftChild);
+
+            if(parent.getParent() == null) this.setRoot(parent);
+        } else if(leftChild.hasSingleChild() && current.isRoot()) {
             this.setRoot(leftChild);
             leftChild.setRightChild(current);
-        } else if(leftChild.hasDoubleChild() && current.getParent() == null) {
+            current.setParent(leftChild);
+        } else if(leftChild.hasDoubleChild() && current.isRoot()) {
             TreeNode rightChild = leftChild.getRightChild();
             this.setRoot(leftChild);
             leftChild.setRightChild(current);
+            current.setParent(leftChild);
             current.setLeftChild(rightChild);
+            rightChild.setParent(current);
         }
     }
 
     public void simpleLeftRotation(TreeNode current) {
         TreeNode rightChild = current.getRightChild();
-        if(rightChild.hasSingleChild() && current.getParent() != null) {
+
+        if(rightChild.hasSingleChild() && !current.isRoot()) {
             TreeNode parent = current.getParent();
+            if(parent.getParent() == null) this.setRoot(parent);
             parent.setRightChild(rightChild);
+            rightChild.setParent(parent);
             rightChild.setLeftChild(current);
-        } else if(rightChild.hasSingleChild() && current.getParent() == null) {
+            current.setParent(rightChild);
+            current.setRightChild(null);
+        } else if(rightChild.hasSingleChild() && current.isRoot()) {
             this.setRoot(rightChild);
+            rightChild.setParent(null);
             rightChild.setLeftChild(current);
-        } else if(rightChild.hasDoubleChild() && current.getParent() == null) {
+            current.setParent(rightChild);
+            current.setRightChild(null);
+        } else if(rightChild.hasDoubleChild() && current.isRoot()) {
             TreeNode leftChild = rightChild.getLeftChild();
             this.setRoot(rightChild);
+            rightChild.setParent(null);
             rightChild.setLeftChild(current);
+            current.setParent(rightChild);
             current.setRightChild(leftChild);
+            leftChild.setParent(current);
         }
     }
 
-    public void doubleRotation(TreeNode current) {
-        int fb = this.getBalanceFactor(current);
-
-        if(fb > 1) {
-
+    public void balanceTree(TreeNode current) {
+        if(current == null) throw new RuntimeException("Node is null");
+        current = current.getParent();
+        while(!this.isBalanced(this.root)) {
+            int fb = this.getBalanceFactor(current);
+            if(fb > 1)
+                this.simpleRightRotation(current);
+            else if(fb < -1)
+                this.simpleLeftRotation(current);
+            if(!current.isRoot())
+                current = current.getParent();
         }
-
     }
 
+    public List<Integer> runTree() {
+        TreeNode current = this.root;
+        List<Integer> list = new ArrayList<>();
+        Stack<TreeNode> stack = new Stack<>();
+        list.add(current.getNodeData());
+        TreeNode lastVisited = current;
+        
+        while(true) {
+            while(!current.isLeaf()) {
+                current = current.getLeftChild();
+                list.add(current.getNodeData());
+            }
 
+            while(!current.isRoot()) {
+                current = current.getParent();
+                if(current.hasDoubleChild()) {
+                    lastVisited = current;
+                    current = current.getRightChild();
+                }
+
+            }
+        }
+        return list;
+    }
+
+    public String printTree() {
+        StringBuilder sb = new StringBuilder();
+        TreeNode current = this.root;
+
+        int rightHeight = this.calculateRightHeight(this.root, 0);
+        int leftHeight = this.calculateLeftHeight(this.root, 0);
+        int aux = 0;
+
+        sb.append(current.getNodeData());
+
+
+        return sb.toString();
+    }
 }

@@ -49,6 +49,10 @@ public class TreeNode {
         return this.leftChild == null && this.rightChild == null;
     }
 
+    public boolean isRoot() {
+        return this.parent == null;
+    }
+
     public boolean hasSingleChild() {
         return (this.leftChild != null && this.rightChild == null) ||
                 (this.leftChild == null && this.rightChild != null);
@@ -62,5 +66,18 @@ public class TreeNode {
         if(!this.hasSingleChild()) throw new RuntimeException("Node does not have a single child");
         if(this.getLeftChild() != null) return this.leftChild;
         return this.rightChild;
+    }
+
+    @Override
+    public String toString() {
+        String leftChild = this.leftChild == null ? "null" : String.valueOf(this.leftChild.getNodeData());
+        String rightChild = this.rightChild == null ? "null" : String.valueOf(this.rightChild.getNodeData());
+        String parent = this.parent == null ? "null" : String.valueOf(this.parent.getNodeData());
+        return "TreeNode{" +
+                "data=" + this.data +
+                ", leftChild=" + leftChild +
+                ", rightChild=" + rightChild +
+                ", parent=" + parent +
+                '}';
     }
 }
