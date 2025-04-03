@@ -53,7 +53,7 @@ public class AVLTree {
         }
         if(!node.isRoot())
             this.balanceTree(node);
-        System.out.println(this.printTree());
+//        System.out.println(this.printTree());
     }
 
     public void delete(int index, int doubleChildMethod) {
@@ -255,22 +255,23 @@ public class AVLTree {
         List<Integer> list = new ArrayList<>();
         Stack<TreeNode> stack = new Stack<>();
         list.add(current.getNodeData());
-        TreeNode lastVisited = current;
-        
-        while(true) {
-            while(!current.isLeaf()) {
-                current = current.getLeftChild();
-                list.add(current.getNodeData());
-            }
 
-            while(!current.isRoot()) {
-                current = current.getParent();
-                if(current.hasDoubleChild()) {
-                    lastVisited = current;
-                    current = current.getRightChild();
+        while(current != null) {
+            do {
+                if(current.hasSingleChild())
+                    current = current.getChild();
+                else if(current.hasDoubleChild()) {
+                    if(!current.isRoot())
+                        list.add(current.getNodeData());
+                    stack.push(current);
+                    current = current.getLeftChild();
                 }
+                list.add(current.getNodeData());
+            } while(!current.isLeaf());
 
-            }
+            if(stack.isEmpty()) break;
+            current = stack.pop();
+            current = current.getRightChild();
         }
         return list;
     }
@@ -278,13 +279,15 @@ public class AVLTree {
     public String printTree() {
         StringBuilder sb = new StringBuilder();
         TreeNode current = this.root;
+        List<Integer> list = runTree();
 
-        int rightHeight = this.calculateRightHeight(this.root, 0);
-        int leftHeight = this.calculateLeftHeight(this.root, 0);
-        int aux = 0;
-
-        sb.append(current.getNodeData());
-
+        for(int i = 0; i < list.size(); i++) {
+            if(i == 0) {
+                sb.append(list.get(i))
+                        .append("\n|")
+                        .append("\n|_");
+            }
+        }
 
         return sb.toString();
     }
