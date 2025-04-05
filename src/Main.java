@@ -12,16 +12,25 @@ public class Main {
         String response;
 
         List<TreeNode> list = List.of(
-                new TreeNode(15),
-                new TreeNode(20),
-                new TreeNode(30),
-                new TreeNode(40),
-                new TreeNode(45),
-                new TreeNode(35)
+                new TreeNode(17),
+                new TreeNode(57),
+                new TreeNode(98),
+                new TreeNode(90),
+                new TreeNode(9),
+                new TreeNode(3)
+//                new TreeNode(54),
+//                new TreeNode(13),
+//                new TreeNode(78),
+//                new TreeNode(32),
+//                new TreeNode(34),
+//                new TreeNode(65),
+//                new TreeNode(55),
+//                new TreeNode(56)
         );
         list.forEach(tree::insert);
 
         tree.runTree();
+        System.out.println(tree.printTree());
 
 //        do {
 //            System.out.println("Selecione a operação desejada: \n" +

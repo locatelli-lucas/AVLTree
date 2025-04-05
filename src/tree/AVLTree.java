@@ -11,10 +11,6 @@ public class AVLTree {
 
     }
 
-    public TreeNode getRoot() {
-        return this.root;
-    }
-
     public void setRoot(TreeNode root) {
         this.root = root;
     }
@@ -239,7 +235,7 @@ public class AVLTree {
     public void balanceTree(TreeNode current) {
         if(current == null) throw new RuntimeException("Node is null");
         current = current.getParent();
-        while(!this.isBalanced(this.root)) {
+        while(current != this.root && !this.isBalanced(this.root)) {
             int fb = this.getBalanceFactor(current);
             if(fb > 1)
                 this.simpleRightRotation(current);
@@ -250,45 +246,132 @@ public class AVLTree {
         }
     }
 
-    public List<Integer> runTree() {
+    public List<TreeNode> runTree() {
         TreeNode current = this.root;
-        List<Integer> list = new ArrayList<>();
+        List<TreeNode> list = new ArrayList<>();
         Stack<TreeNode> stack = new Stack<>();
-        list.add(current.getNodeData());
+        list.add(current);
 
         while(current != null) {
             do {
                 if(current.hasSingleChild())
                     current = current.getChild();
                 else if(current.hasDoubleChild()) {
-                    if(!current.isRoot())
-                        list.add(current.getNodeData());
+                    if(!current.isRoot() && !list.contains(current))
+                        list.add(current);
                     stack.push(current);
                     current = current.getLeftChild();
                 }
-                list.add(current.getNodeData());
+                list.add(current);
             } while(!current.isLeaf());
 
             if(stack.isEmpty()) break;
             current = stack.pop();
             current = current.getRightChild();
         }
+//        list.forEach(e -> System.out.println(e.getNodeData()));
         return list;
     }
 
     public String printTree() {
         StringBuilder sb = new StringBuilder();
-        TreeNode current = this.root;
-        List<Integer> list = runTree();
+        TreeNode current;
+        List<TreeNode> list = runTree();
 
-        for(int i = 0; i < list.size(); i++) {
-            if(i == 0) {
-                sb.append(list.get(i))
-                        .append("\n|")
-                        .append("\n|_");
+        int aux1 = 3;
+        int aux2 = 3;
+        int aux3 = 0;
+        String spaceAux1 = "|" + " ".repeat(aux1);
+        String spaceAux2 = " ".repeat(aux2);
+
+        sb.append("\n|")
+                .append("\n|_ ");
+
+        int i = 0;
+        do {
+            current = this.search(list.get(i).getNodeData());
+
+            if(current.getNodeData() < this.root.getNodeData()) {
+                if(current.isLeaf()) {
+                    sb.append(current.getNodeData());
+                    aux3++;
+                }
+                else if(current.hasSingleChild()) {
+                    sb.append(current.getNodeData())
+                            .append("\n")
+                            .append(spaceAux1)
+                            .append("|\n")
+                            .append(spaceAux1)
+                            .append("|_ ");
+                    aux3++;
+                } else if(current.hasDoubleChild()) {
+                    sb.append(current.getNodeData());
+                    aux3++;
+                    if(list.get(i + 1) == current.getLeftChild()) {
+                        sb.append("\n")
+                                .append(spaceAux1)
+                                .append("|\n")
+                                .append(spaceAux1)
+                                .append("|_ ")
+                                .append(current.getLeftChild().getNodeData());
+                        aux3++;
+                    }
+                    if(list.get(i + 2) == current.getRightChild()) {
+                        sb.append("\n")
+                                .append(spaceAux1)
+                                .append("|\n")
+                                .append(spaceAux1)
+                                .append("|_ ")
+                                .append(current.getRightChild().getNodeData());
+                        aux3++;
+                    }
+                }
+                i = aux3;
+                aux1 += 3;
+            } else {
+                if(!current.isRoot() && current.getParent().isRoot()) {
+                    sb.append("\n")
+                            .append("|\n")
+                            .append("|_ ");
+                }
+                if(current.hasSingleChild()) {
+                    sb.append(current.getNodeData())
+                            .append("\n")
+                            .append(spaceAux2)
+                            .append("|\n")
+                            .append(spaceAux2)
+                            .append("|_ ");
+                    aux3++;
+                } else if(current.hasDoubleChild()) {
+                    sb.append(current.getNodeData());
+                    aux3++;
+                    if(list.get(i + 1) == current.getLeftChild()) {
+                        sb.append("\n")
+                                .append(spaceAux2)
+                                .append("|\n")
+                                .append(spaceAux2)
+                                .append("|_ ")
+                                .append(current.getLeftChild().getNodeData());
+                        aux3++;
+                    }
+                    if(list.get(i + 2) == current.getRightChild()) {
+                        sb.append("\n")
+                                .append(spaceAux2)
+                                .append("|\n")
+                                .append(spaceAux2)
+                                .append("|_ ")
+                                .append(current.getRightChild().getNodeData());
+                        aux3++;
+                    }
+                } else if(current.isLeaf()) {
+                    sb.append(current.getNodeData());
+                    aux3++;
+                }
+                i = aux3;
+                aux2 += 3;
             }
-        }
-
+            i++;
+        } while(i < list.size());
         return sb.toString();
     }
 }
