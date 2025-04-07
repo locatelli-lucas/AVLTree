@@ -17,10 +17,10 @@ public class Main {
                 new TreeNode(98),
                 new TreeNode(90),
                 new TreeNode(9),
-                new TreeNode(3)
-//                new TreeNode(54),
-//                new TreeNode(13),
-//                new TreeNode(78),
+                new TreeNode(3),
+                new TreeNode(54),
+                new TreeNode(13),
+                new TreeNode(78)
 //                new TreeNode(32),
 //                new TreeNode(34),
 //                new TreeNode(65),

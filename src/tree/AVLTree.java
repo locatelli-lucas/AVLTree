@@ -137,10 +137,10 @@ public class AVLTree {
     }
 
     public int calculateLeftHeight(TreeNode current, int height) {
-        if(current.getLeftChild() == null
-                && current.getRightChild() != null
-                && !current.isRoot())
-            return calculateLeftHeight(current.getChild(), height + 1);
+//        if(current.getLeftChild() == null
+//                && current.getRightChild() != null
+//                && !current.isRoot())
+//            return calculateLeftHeight(current.getChild(), height + 1);
         if(current.getLeftChild() == null || current.isLeaf()) return height;
         if(current.hasSingleChild()) return calculateLeftHeight(current.getChild(), height + 1);
 
@@ -152,10 +152,10 @@ public class AVLTree {
     }
 
     public int calculateRightHeight(TreeNode current, int height) {
-        if(current.getRightChild() == null
-                && current.getLeftChild() != null
-                && !current.isRoot())
-            return calculateRightHeight(current.getChild(), height + 1);
+//        if(current.getRightChild() == null
+//                && current.getLeftChild() != null
+//                && !current.isRoot())
+//            return calculateRightHeight(current.getChild(), height + 1);
         if(current.getRightChild() == null || current.isLeaf()) return height;
         if(current.hasSingleChild()) return calculateRightHeight(current.getChild(), height + 1);
 
@@ -188,6 +188,7 @@ public class AVLTree {
             leftChild.setParent(parent);
             leftChild.setRightChild(current);
             current.setParent(leftChild);
+            current.setLeftChild(null);
 
             if(parent.getParent() == null) this.setRoot(parent);
         } else if(leftChild.hasSingleChild() && current.isRoot()) {
@@ -235,7 +236,7 @@ public class AVLTree {
     public void balanceTree(TreeNode current) {
         if(current == null) throw new RuntimeException("Node is null");
         current = current.getParent();
-        while(current != this.root && !this.isBalanced(this.root)) {
+        while(current != null && !this.isBalanced(this.root)) {
             int fb = this.getBalanceFactor(current);
             if(fb > 1)
                 this.simpleRightRotation(current);
@@ -269,7 +270,7 @@ public class AVLTree {
             current = stack.pop();
             current = current.getRightChild();
         }
-//        list.forEach(e -> System.out.println(e.getNodeData()));
+        list.forEach(e -> System.out.print(e.getNodeData() + " "));
         return list;
     }
 
