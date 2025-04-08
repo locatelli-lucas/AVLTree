@@ -29,7 +29,6 @@ public class Main {
         );
         list.forEach(tree::insert);
 
-        tree.runTree();
         System.out.println(tree.printTree());
 
 //        do {
