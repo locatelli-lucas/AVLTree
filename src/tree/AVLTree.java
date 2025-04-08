@@ -136,46 +136,40 @@ public class AVLTree {
         return null;
     }
 
-    public int calculateLeftHeight(TreeNode current, int height) {
-//        if(current.getLeftChild() == null
-//                && current.getRightChild() != null
-//                && !current.isRoot())
-//            return calculateLeftHeight(current.getChild(), height + 1);
+    public int calculateLeftHeight(TreeNode current, int height, boolean isRoot) {
         if(current.getLeftChild() == null || current.isLeaf()) return height;
-        if(current.hasSingleChild()) return calculateLeftHeight(current.getChild(), height + 1);
+        if(current.hasSingleChild()) return calculateLeftHeight(current.getChild(), height + 1, isRoot);
 
-        int leftHeight = calculateLeftHeight(current.getLeftChild(), height + 1);
-        int rightHeight = calculateRightHeight(current.getRightChild(), height + 1);
+        int leftHeight = calculateLeftHeight(current.getLeftChild(), height + 1, isRoot);
+        int rightHeight = calculateRightHeight(current.getRightChild(), height + 1, isRoot);
 
-        if(current.isRoot()) return leftHeight;
+        if(current.hasDoubleChild()) return leftHeight;
+
         return Math.max(leftHeight, rightHeight);
     }
 
-    public int calculateRightHeight(TreeNode current, int height) {
-//        if(current.getRightChild() == null
-//                && current.getLeftChild() != null
-//                && !current.isRoot())
-//            return calculateRightHeight(current.getChild(), height + 1);
+    public int calculateRightHeight(TreeNode current, int height, boolean isRoot) {
         if(current.getRightChild() == null || current.isLeaf()) return height;
-        if(current.hasSingleChild()) return calculateRightHeight(current.getChild(), height + 1);
+        if(current.hasSingleChild()) return calculateRightHeight(current.getChild(), height + 1, isRoot);
 
-        int leftHeight = calculateLeftHeight(current.getLeftChild(), height + 1);
-        int rightHeight = calculateRightHeight(current.getRightChild(), height + 1);
+        int leftHeight = calculateLeftHeight(current.getLeftChild(), height + 1, isRoot);
+        int rightHeight = calculateRightHeight(current.getRightChild(), height + 1, isRoot);
 
-        if(current.isRoot()) return rightHeight;
+        if(current.hasDoubleChild()) return rightHeight;
+
         return Math.max(leftHeight, rightHeight);
     }
 
-    public int getBalanceFactor(TreeNode current) {
+    public int getBalanceFactor(TreeNode current, boolean isRoot) {
         if(current.isLeaf()) return 0;
-        int leftHeight = this.calculateLeftHeight(current, 0);
-        int rightHeight = this.calculateRightHeight(current, 0);
+        int leftHeight = this.calculateLeftHeight(current, 0, isRoot);
+        int rightHeight = this.calculateRightHeight(current, 0, isRoot);
 
         return leftHeight - rightHeight;
     }
 
-    public boolean isBalanced(TreeNode current) {
-        int fb = this.getBalanceFactor(current);
+    public boolean isBalanced(TreeNode current, boolean isRoot) {
+        int fb = this.getBalanceFactor(current, isRoot);
         return fb >= -1 && fb <= 1;
     }
 
@@ -236,8 +230,8 @@ public class AVLTree {
     public void balanceTree(TreeNode current) {
         if(current == null) throw new RuntimeException("Node is null");
         current = current.getParent();
-        while(current != null && !this.isBalanced(this.root)) {
-            int fb = this.getBalanceFactor(current);
+        while(current != null && !this.isBalanced(this.root, true)) {
+            int fb = this.getBalanceFactor(current, false);
             if(fb > 1)
                 this.simpleRightRotation(current);
             else if(fb < -1)
