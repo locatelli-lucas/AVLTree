@@ -263,102 +263,17 @@ public class AVLTree {
         TreeNode current;
         List<TreeNode> list = runTree();
         list.forEach(e -> System.out.print(e.getNodeData() + " "));
+        System.out.println();
 
-        int aux1 = 3;
-        int aux2 = 3;
-        int aux3 = 0;
-        String spaceAux1 = "|" + " ".repeat(aux1);
-        String spaceAux2 = " ".repeat(aux2);
+        sb.append(list.getFirst().getNodeData()).append("\n");
 
-        sb.append("\n|")
-                .append("\n|_ ");
+        for (int i = 1; i < list.size(); i++) {
+            TreeNode node = this.search(list.get(i).getNodeData());
 
-        int i = 0;
-        do {
-            current = this.search(list.get(i).getNodeData());
-
-            if(current.getNodeData() < this.root.getNodeData()) {
-                if(current.isLeaf()) {
-                    sb.append(current.getNodeData());
-                    aux3++;
-                }
-                else if(current.hasSingleChild()) {
-                    sb.append(current.getNodeData())
-                            .append("\n")
-                            .append(spaceAux1)
-                            .append("|\n")
-                            .append(spaceAux1)
-                            .append("|_ ");
-                    aux3++;
-                } else if(current.hasDoubleChild()) {
-                    sb.append(current.getNodeData());
-                    aux3++;
-                    if(list.get(i + 1) == current.getLeftChild()) {
-                        sb.append("\n")
-                                .append(spaceAux1)
-                                .append("|\n")
-                                .append(spaceAux1)
-                                .append("|_ ")
-                                .append(current.getLeftChild().getNodeData());
-                        aux3++;
-                    }
-                    if(list.get(i + 2) == current.getRightChild()) {
-                        sb.append("\n")
-                                .append(spaceAux1)
-                                .append("|\n")
-                                .append(spaceAux1)
-                                .append("|_ ")
-                                .append(current.getRightChild().getNodeData());
-                        aux3++;
-                    }
-                }
-                i = aux3;
-                aux1 += 3;
-            } else {
-                if(!current.isRoot() && current.getParent().isRoot()) {
-                    sb.append("\n")
-                            .append("|\n")
-                            .append("|_ ");
-                }
-                if(current.hasSingleChild()) {
-                    sb.append(current.getNodeData())
-                            .append("\n")
-                            .append(spaceAux2)
-                            .append("|\n")
-                            .append(spaceAux2)
-                            .append("|_ ");
-                    aux3++;
-                } else if(current.hasDoubleChild()) {
-                    sb.append(current.getNodeData());
-                    aux3++;
-                    if(list.get(i + 1) == current.getLeftChild()) {
-                        sb.append("\n")
-                                .append(spaceAux2)
-                                .append("|\n")
-                                .append(spaceAux2)
-                                .append("|_ ")
-                                .append(current.getLeftChild().getNodeData());
-                        aux3++;
-                    }
-                    if(list.get(i + 2) == current.getRightChild()) {
-                        sb.append("\n")
-                                .append(spaceAux2)
-                                .append("|\n")
-                                .append(spaceAux2)
-                                .append("|_ ")
-                                .append(current.getRightChild().getNodeData());
-                        aux3++;
-                    }
-                } else if(current.isLeaf()) {
-                    sb.append(current.getNodeData());
-                    aux3++;
-                }
-                i = aux3;
-                aux2 += 3;
+            if(node.getNodeData() < this.root.getNodeData()) {
             }
-            i++;
-            System.out.println(sb);
-        } while(i < list.size());
+        }
+
         return sb.toString();
     }
 }
