@@ -2,7 +2,6 @@ package tree;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 public class AVLTree {
     private TreeNode root;
@@ -43,26 +42,31 @@ public class AVLTree {
                         inserted = true;
                     } else {
                         current = current.getRightChild();
-                    }
-                }
-            }
+                   }
+               }
+          }
         }
         if(!node.isRoot())
             this.balanceTree(node);
-//        System.out.println(this.printTree());
+        System.out.println("Nó " + node.getNodeData() + "inserido\n\n" + this.printTree());
     }
 
     public void delete(int index, int doubleChildMethod) {
         TreeNode current = this.search(index);
         if(current == null) throw new RuntimeException("Node not found");
+        TreeNode parent = current.getParent();
 
         if(current.hasSingleChild())
             this.singleChildDelete(current);
-        else if(current.hasDoubleChild())
-            if(doubleChildMethod == 1)
+        else if(current.hasDoubleChild()) {
+            if (doubleChildMethod == 1)
                 this.doubleChildDeleteByMerge(current);
-            else if(doubleChildMethod == 2)
+            else if (doubleChildMethod == 2)
                 this.doubleChildDeleteByCopy(current);
+        } else
+            this.deleteLeaf(current);
+        this.balanceTree(parent);
+        System.out.println("Nó " + index + " deletado\n\n" + this.printTree());
     }
 
     public void deleteLeaf(TreeNode node) {
@@ -81,46 +85,55 @@ public class AVLTree {
         TreeNode parent = node.getParent();
 
         if(parent != null && child != null) {
-            if(parent.getNodeData() < node.getNodeData())
+            if(parent.getNodeData() > node.getNodeData())
                 parent.setLeftChild(child);
             else
                 parent.setRightChild(child);
-        } else if(node.isLeaf())
-            this.deleteLeaf(node);
+            child.setParent(parent);
+        }
     }
 
     public void doubleChildDeleteByCopy(TreeNode node) {
         TreeNode current = node.getLeftChild();
 
-        while(!current.isLeaf()) {
+        while(!current.isLeaf() && current.getRightChild() != null)
             current = current.getRightChild();
-        }
 
         node.setNodeData(current.getNodeData());
-        TreeNode leafParent = current.getParent();
 
-        if(current == node.getLeftChild())
-            leafParent.setLeftChild(null);
+        TreeNode parent = current.getParent();
+
+        TreeNode child;
+        if(current.hasSingleChild()) {
+            child = current.getChild();
+        } else if(current.hasDoubleChild()) {
+
+        }
+
+
+        if(parent.getNodeData() > child.getNodeData())
+            parent.setLeftChild(child);
         else
-            leafParent.setRightChild(null);
+            parent.setRightChild(child);
 
-        current = null;
+        child.setParent(parent);
     }
 
     public void doubleChildDeleteByMerge(TreeNode node) {
         TreeNode rightChild = node.getRightChild();
         TreeNode newRoot = node.getLeftChild();
 
-        while(!newRoot.isLeaf())
+        while(!newRoot.isLeaf() && newRoot.getRightChild() != null)
             newRoot = newRoot.getRightChild();
 
         newRoot.setRightChild(rightChild);
-        node.setRightChild(null);
+        rightChild.setParent(newRoot);
 
         TreeNode leftChild = node.getLeftChild();
         TreeNode parent = node.getParent();
 
         parent.setRightChild(leftChild);
+        leftChild.setParent(parent);
     }
 
     public TreeNode search(int index) {
@@ -168,14 +181,26 @@ public class AVLTree {
         TreeNode parent = current.getParent();
 
         if(leftChild.hasSingleChild() && !current.isRoot()) {
-            current.setParent(leftChild);
-            current.setLeftChild(null);
-            leftChild.setRightChild(current);
-            leftChild.setParent(parent);
+            if(leftChild.getLeftChild() == null) {
+                TreeNode newParent = leftChild.getRightChild();
 
-            if(parent.getLeftChild() == current) parent.setLeftChild(leftChild);
-            else parent.setRightChild(leftChild);
+                leftChild.setParent(newParent);
+                leftChild.setRightChild(null);
+                newParent.setLeftChild(leftChild);
+                newParent.setParent(parent);
+                newParent.setRightChild(current);
+                current.setLeftChild(null);
+                current.setParent(newParent);
+                parent.setRightChild(newParent);
+            } else {
+                current.setParent(leftChild);
+                current.setLeftChild(null);
+                leftChild.setRightChild(current);
+                leftChild.setParent(parent);
 
+                if(parent.getLeftChild() == current) parent.setLeftChild(leftChild);
+                else parent.setRightChild(leftChild);
+            }
         } else if(leftChild.hasSingleChild() && current.isRoot()) {
             this.setRoot(leftChild);
             leftChild.setRightChild(current);
@@ -187,20 +212,42 @@ public class AVLTree {
             current.setParent(leftChild);
             current.setLeftChild(rightChild);
             rightChild.setParent(current);
+        } else if(leftChild.hasDoubleChild() && !current.isRoot()) {
+            TreeNode rightChild = leftChild.getRightChild();
+            leftChild.setParent(current.getParent());
+            current.setParent(leftChild);
+            current.setLeftChild(rightChild);
+            rightChild.setParent(current);
+            leftChild.setRightChild(current);
+            leftChild.getParent().setLeftChild(leftChild);
         }
     }
 
     public void simpleLeftRotation(TreeNode current) {
         TreeNode rightChild = current.getRightChild();
+        TreeNode parent = current.getParent();
 
         if(rightChild.hasSingleChild() && !current.isRoot()) {
-            TreeNode parent = current.getParent();
-            if(parent.getParent() == null) this.setRoot(parent);
-            parent.setRightChild(rightChild);
-            rightChild.setParent(parent);
-            rightChild.setLeftChild(current);
-            current.setParent(rightChild);
-            current.setRightChild(null);
+            if(rightChild.getRightChild() == null) {
+                TreeNode newParent = rightChild.getLeftChild();
+
+                rightChild.setParent(newParent);
+                rightChild.setRightChild(null);
+                newParent.setRightChild(rightChild);
+                newParent.setParent(parent);
+                newParent.setLeftChild(current);
+                current.setRightChild(null);
+                current.setParent(newParent);
+                parent.setRightChild(newParent);
+            } else {
+                current.setParent(rightChild);
+                current.setRightChild(null);
+                rightChild.setLeftChild(current);
+                rightChild.setParent(parent);
+
+                if(parent.getRightChild() == current) parent.setRightChild(rightChild);
+                else parent.setLeftChild(rightChild);
+            }
         } else if(rightChild.hasSingleChild() && current.isRoot()) {
             this.setRoot(rightChild);
             rightChild.setParent(null);
@@ -215,6 +262,13 @@ public class AVLTree {
             current.setParent(rightChild);
             current.setRightChild(leftChild);
             leftChild.setParent(current);
+        } else if(rightChild.hasDoubleChild() && !current.isRoot()) {
+            rightChild.setParent(current.getParent());
+            current.setParent(rightChild);
+            current.setRightChild(rightChild.getLeftChild());
+            rightChild.getLeftChild().setParent(current);
+            rightChild.getParent().setLeftChild(rightChild);
+            rightChild.setLeftChild(current);
         }
     }
 
@@ -232,48 +286,27 @@ public class AVLTree {
         }
     }
 
-    public List<TreeNode> runTree() {
-        TreeNode current = this.root;
-        List<TreeNode> list = new ArrayList<>();
-        Stack<TreeNode> stack = new Stack<>();
-        list.add(current);
-
-        while(current != null) {
-            do {
-                if(current.hasSingleChild())
-                    current = current.getChild();
-                else if(current.hasDoubleChild()) {
-                    if(!current.isRoot() && !list.contains(current))
-                        list.add(current);
-                    stack.push(current);
-                    current = current.getLeftChild();
-                }
-                list.add(current);
-            } while(!current.isLeaf());
-
-            if(stack.isEmpty()) break;
-            current = stack.pop();
-            current = current.getRightChild();
-        }
-        return list;
-    }
-
     public String printTree() {
         StringBuilder sb = new StringBuilder();
-        TreeNode current;
-        List<TreeNode> list = runTree();
-        list.forEach(e -> System.out.print(e.getNodeData() + " "));
-        System.out.println();
-
-        sb.append(list.getFirst().getNodeData()).append("\n");
-
-        for (int i = 1; i < list.size(); i++) {
-            TreeNode node = this.search(list.get(i).getNodeData());
-
-            if(node.getNodeData() < this.root.getNodeData()) {
-            }
-        }
-
+        printTreeHelper(this.root, sb, "", true);
         return sb.toString();
     }
+
+    private void printTreeHelper(TreeNode node, StringBuilder sb, String prefix, boolean isTail) {
+        if (node == null) return;
+
+        sb.append(prefix)
+                .append(isTail ? "└── " : "├── ")
+                .append(node.getNodeData())
+                .append("\n");
+
+        List<TreeNode> children = new ArrayList<>();
+        if (node.getLeftChild() != null) children.add(node.getLeftChild());
+        if (node.getRightChild() != null) children.add(node.getRightChild());
+
+        for (int i = 0; i < children.size(); i++) {
+            printTreeHelper(children.get(i), sb, prefix + (isTail ? "    " : "│   "), i == children.size() - 1);
+        }
+    }
+
 }
