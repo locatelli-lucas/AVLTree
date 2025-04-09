@@ -65,19 +65,19 @@ public class AVLTree {
                 this.doubleChildDeleteByCopy(current);
         } else
             this.deleteLeaf(current);
-        this.balanceTree(parent);
         System.out.println("Nó " + index + " deletado\n\n" + this.printTree());
     }
 
     public void deleteLeaf(TreeNode node) {
-        TreeNode current = node.getParent();
-        if(current != null) {
-            if(current.getLeftChild() == node)
-                current.setLeftChild(null);
+        TreeNode parent = node.getParent();
+        if(parent != null) {
+            if(parent.getLeftChild() == node)
+                parent.setLeftChild(null);
             else
-                current.setRightChild(null);
+                parent.setRightChild(null);
         } else
             node = null;
+        this.balanceTree(parent);
     }
 
     public void singleChildDelete(TreeNode node) {
@@ -91,6 +91,7 @@ public class AVLTree {
                 parent.setRightChild(child);
             child.setParent(parent);
         }
+        this.balanceTree(child);
     }
 
     public void doubleChildDeleteByCopy(TreeNode node) {
@@ -100,40 +101,28 @@ public class AVLTree {
             current = current.getRightChild();
 
         node.setNodeData(current.getNodeData());
+        this.deleteLeaf(current);
 
-        TreeNode parent = current.getParent();
-
-        TreeNode child;
-        if(current.hasSingleChild()) {
-            child = current.getChild();
-        } else if(current.hasDoubleChild()) {
-
-        }
-
-
-        if(parent.getNodeData() > child.getNodeData())
-            parent.setLeftChild(child);
-        else
-            parent.setRightChild(child);
-
-        child.setParent(parent);
+        this.balanceTree(current);
     }
 
     public void doubleChildDeleteByMerge(TreeNode node) {
         TreeNode rightChild = node.getRightChild();
-        TreeNode newRoot = node.getLeftChild();
+        TreeNode current = node.getLeftChild();
 
-        while(!newRoot.isLeaf() && newRoot.getRightChild() != null)
-            newRoot = newRoot.getRightChild();
+        while(!current.isLeaf() && current.getRightChild() != null)
+            current = current.getRightChild();
 
-        newRoot.setRightChild(rightChild);
-        rightChild.setParent(newRoot);
+        current.setRightChild(rightChild);
+        rightChild.setParent(current);
 
         TreeNode leftChild = node.getLeftChild();
         TreeNode parent = node.getParent();
 
-        parent.setRightChild(leftChild);
+        parent.setLeftChild(leftChild);
         leftChild.setParent(parent);
+
+        this.balanceTree(current);
     }
 
     public TreeNode search(int index) {
