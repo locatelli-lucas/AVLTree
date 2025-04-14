@@ -40,7 +40,8 @@ public class Main {
                     "4 - Imprimir a árvore\n" +
                     "5 - Sair"
             );
-            response = sc.nextLine();
+
+        response = sc.nextLine();
 
             switch (response) {
                 case "1":
