@@ -7,14 +7,16 @@ public class AVLTree {
     private TreeNode root;
 
     public AVLTree() {
-
+        // Construtor da árvore AVL.
     }
 
     public void setRoot(TreeNode root) {
+        // Define o nó raiz da árvore.
         this.root = root;
     }
 
     public void insert(TreeNode node) {
+        // Insere um nó na árvore AVL e realiza balanceamento, se necessário.
         if(this.root == null) {
             this.root = node;
         } else if(this.search(node.getNodeData()) != null) {
@@ -55,6 +57,7 @@ public class AVLTree {
     }
 
     public void delete(int index, int doubleChildMethod) {
+        // Remove um nó da árvore AVL com base no índice e no método de remoção para nós com dois filhos.
         TreeNode current = this.search(index);
         if(current == null) throw new RuntimeException("Node not found");
         TreeNode parent = current.getParent();
@@ -72,6 +75,7 @@ public class AVLTree {
     }
 
     public void deleteLeaf(TreeNode node) {
+        // Remove um nó folha da árvore AVL e realiza balanceamento.
         TreeNode parent = node.getParent();
         if(parent != null) {
             if(parent.getLeftChild() == node)
@@ -84,6 +88,7 @@ public class AVLTree {
     }
 
     public void singleChildDelete(TreeNode node) {
+        // Remove um nó com um único filho e ajusta os ponteiros.
         TreeNode child = node.getChild();
         TreeNode parent = node.getParent();
 
@@ -98,6 +103,7 @@ public class AVLTree {
     }
 
     public void doubleChildDeleteByCopy(TreeNode node) {
+        // Remove um nó com dois filhos usando o método de cópia do predecessor.
         TreeNode current = node.getLeftChild();
 
         while(!current.isLeaf() && current.getRightChild() != null)
@@ -110,6 +116,7 @@ public class AVLTree {
     }
 
     public void doubleChildDeleteByMerge(TreeNode node) {
+        // Remove um nó com dois filhos usando o método de mesclagem.
         TreeNode rightChild = node.getRightChild();
         TreeNode current = node.getLeftChild();
 
@@ -129,6 +136,7 @@ public class AVLTree {
     }
 
     public TreeNode search(int index) {
+        // Busca um nó na árvore AVL com base no índice.
         TreeNode current = this.root;
         while(current != null) {
             if(index == current.getNodeData())
@@ -142,6 +150,7 @@ public class AVLTree {
     }
 
     public int getBalanceFactor(TreeNode current) {
+        // Calcula o fator de balanceamento de um nó.
         if(current.isLeaf()) return 0;
         int leftHeight = 0;
         int rightHeight = 0;
@@ -157,6 +166,7 @@ public class AVLTree {
     }
 
     public int calculateHeight(TreeNode current, int height, int calcType) {
+        // Calcula a altura de um nó na árvore AVL.
         if(current.isLeaf()) return height + 1;
         if(current.hasDoubleChild()) {
             int leftHeight = calculateHeight(current.getLeftChild(), height + 1, calcType);
@@ -169,11 +179,13 @@ public class AVLTree {
     }
 
     public boolean isBalanced(TreeNode current) {
+        // Verifica se um nó está balanceado.
         int fb = this.getBalanceFactor(current);
         return fb >= -1 && fb <= 1;
     }
 
     public void simpleRightRotation(TreeNode current) {
+        // Realiza uma rotação simples à direita em um nó.
         TreeNode leftChild = current.getLeftChild();
         TreeNode parent = current.getParent();
 
@@ -228,6 +240,7 @@ public class AVLTree {
 
 
     public void simpleLeftRotation(TreeNode current) {
+        // Realiza uma rotação simples à esquerda em um nó.
         TreeNode rightChild = current.getRightChild();
         TreeNode parent = current.getParent();
 
@@ -281,6 +294,7 @@ public class AVLTree {
     }
 
     public void balanceTree(TreeNode current) {
+        // Realiza o balanceamento da árvore AVL a partir de um nó.
         if(current == null) throw new RuntimeException("Node is null");
         current = current.getParent();
         while(current != null || !this.isBalanced(this.root)) {
@@ -299,16 +313,18 @@ public class AVLTree {
     }
 
     public String printTree() {
+        // Retorna uma representação em string da árvore AVL.
         StringBuilder sb = new StringBuilder();
         printTreeHelper(this.root, sb, "", true);
         return sb.toString();
     }
 
-    private void printTreeHelper(TreeNode node, StringBuilder sb, String prefix, boolean isTail) {
+    private void printTreeHelper(TreeNode node, StringBuilder sb, String str, boolean isLeaf) {
+        // Função auxiliar para formatar a impressão da árvore AVL.
         if (node == null) return;
 
-        sb.append(prefix)
-                .append(isTail ? "└── " : "├── ")
+        sb.append(str)
+                .append(isLeaf ? "└── " : "├── ")
                 .append(node.getNodeData())
                 .append("\n");
 
@@ -317,7 +333,7 @@ public class AVLTree {
         if (node.getRightChild() != null) children.add(node.getRightChild());
 
         for (int i = 0; i < children.size(); i++) {
-            printTreeHelper(children.get(i), sb, prefix + (isTail ? "    " : "│   "), i == children.size() - 1);
+            printTreeHelper(children.get(i), sb, str + (isLeaf ? "    " : "│   "), i == children.size() - 1);
         }
     }
 
